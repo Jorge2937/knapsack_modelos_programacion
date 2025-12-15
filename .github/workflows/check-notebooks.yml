@@ -7,12 +7,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.9'
+        
     - name: Install nbstripout
       run: pip install nbstripout
-    - name: Check if notebooks are stripped
+      
+    - name: Check validity
       run: |
-        nbstripout --is-stripped **/*.ipynb || (echo "ERROR: Los notebooks no están limpios. Ejecuta 'nbstripout' antes de subir. ('pip install nbstripout' en tu venv y 'nbstripout --install' en el repositorio git" && exit 1)
+        echo "Buscando notebooks sucios..."
+        # Busca todos los .ipynb y ejecútales el limpiador
+        find . -type f -name "*.ipynb" -exec nbstripout {} +
+        
+        # Si git detecta que un archivo ha cambiado tras limpiarlo, falla el proceso
+        git diff --exit-code
